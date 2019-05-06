@@ -19,5 +19,5 @@ public func routes(_ router: Router) throws {
     router.delete("todos", Todo.parameter, use: todoController.delete)
     
     let ghostController = GhostController()
-    router.get("sendLatest", use ghostController.ghostAppleNewsFormat)
+    router.get("sendLatest", use: ghostController.ghostAppleNewsFormat)
 }
