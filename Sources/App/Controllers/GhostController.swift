@@ -8,40 +8,63 @@ final class GhostController {
         let channelKey = "184666b5-0e93-44d8-9353-a99abe54c495"
         let channelSignature = "dUEMHGatwvHU6SD04uew48bRzegYB7A3d4r0MJ4fDXE="
         let url = "https://news-api.apple.com/channels/\(channelID)/articles"
-        
-        var appleNewsHeaders [String:String] = [Authorization: "HHMAC; key=\"\(channelKey)\"; signature=\"\(channelSignature)\"; date=\"2015-03-05T03:00:27Z\""]
+
+        var appleNewsHeaders: [String:String] = ["Authorization": "HHMAC; key=\"\(channelKey)\"; signature=\"\(channelSignature)\"; date=\"2015-03-05T03:00:27Z\""]
             appleNewsHeaders["Content-Type"] = "multipart/form-data; boundary=applenews"
-        var tempBody = ["--applenews\n"]
-            tempBody.append("Content-Type: application/json\n")
-            tempBody.append("Content-Disposition: form-data; filename=article.json; name=article.json")
-            tempBody.append(Body.body)
-        
-        
-        for image in Body.files {
-            tempBody.append("Content-Type: image/jpeg\n")
-            tempBody.append("Content-Disposition: form-data; filename=\(image.name); name=\(image.name)\n")
-            tempBody.append(image.data.)
+
+        var body: String {
+            var appleNewsBody: AppleNewsBody {
+                let ghostBody = 
+                return
+            }
+
+            var appleNewsFiles: [File]? {
+                return nil
+            } 
+
+            let body = Body(
+                body: appleNewsBody,
+                files: appleNewsFiles
+            )
+
+            var tempBody = ["--applenews\n"]
+                tempBody.append("Content-Type: application/json\n")
+                tempBody.append("Content-Disposition: form-data; filename=article.json; name=article.json\n")
+                tempBody.append("\(body.body)\n")
+            if let files = body.files {
+                for image in files {
+                    tempBody.append("--applenews\n")
+                    tempBody.append("Content-Type: image/jpeg\n")
+                    tempBody.append("Content-Disposition: form-data; filename=\(image.name); name=\(image.name)\n")
+                    tempBody.append(image.data)
+                }
+            }
+            return tempBody.description
         }
+        let httpBody = HTTPBody(string: body)
         
-        let body = HTTPBody()
-        
-        
-            appleNewsHeaders["Content-Length"] = body.Length
+            appleNewsHeaders["Content-Length"] = "\(body.length)"
         
         let headers = HTTPHeaders(appleNewsHeaders.map { $0 })
         
-        let request = Request(using: self.client.container)
+        let request = Request(using: client.container)
         request.http.method = .POST
         request.http.headers = headers
-        request.http.body = body
+        request.http.body = httpBody
         request.http.url = URL(string: url)!
         
-        return client.post(request)
+        return client.send(request).map {_ in
+            return .ok
+        }
     }
 }
 
 struct Body: Codable {
     let body: AppleNewsBody
-    let files: [File]
+    let files: [File]?
 }
 
+struct Ghost: Codable {
+    let id: String
+    let html: String
+}
